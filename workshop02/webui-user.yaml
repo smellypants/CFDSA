@@ -1,0 +1,24 @@
+apiVersion: v1
+kind: ServiceAccount
+
+metadata:
+   name: webui-user
+   namespace: kube-system 
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+
+metadata:
+   name: webui-user
+   namespace: kube-system
+
+roleRef:      # Pre-defined role "ClusterAdmin"
+   apiGroup: rbac.authorization.k8s.io
+   kind: ClusterRole
+   name: cluster-admin
+
+subjects:     # Assigned with the role mentioned in roleref
+- kind: ServiceAccount
+  name: webui-user
+  namespace: kube-system

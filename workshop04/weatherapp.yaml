@@ -1,14 +1,22 @@
 ---
+kind: Namespace
+apiVersion: v1
+
+metadata:
+    name: weatherns
+    labels:
+        app: weatherapp
+---
 kind: Secret
 apiVersion: v1
 metadata:
     name: weatherapp-secret
-    namespace: myns
+    namespace: weatherns
     labels:
         app: weatherapp-secret
 
 data:
-    app_id: 65506c6a2fa53b03e48e5b2a35e2fe25
+    app_id: NzVhYjQxNjQyZTY1ZDEzYmRkZmJlZmM0ZjU0MzI3ZDk=
 
 ---
 kind: Deployment
@@ -16,7 +24,7 @@ apiVersion: apps/v1
 
 metadata:
     name: weatherapp-deploy
-    namespace: myns
+    namespace: weatherns
     labels:
         app: weatherapp-deploy
 
@@ -45,6 +53,27 @@ spec:
               ports:
               - name: weatherapp-port
                 containerPort: 3000
+              readinessProbe:
+                httpGet:
+                    path: /ready
+                    port: weatherapp-port
+              livenessProbe:
+                httpGet:
+                    path: /health
+                    port: weatherapp-port
+              resources:
+                requests:
+                    cpu: 100m
+                    memory: 16Mi
+                limits:
+                    cpu: 150m
+                    memory: 64Mi
+            
+    strategy:
+        type: RollingUpdate
+        rollingUpdate:
+            maxSurge: 1
+            maxUnavailable: 1
 
 ---
 kind: Service
@@ -52,15 +81,36 @@ apiVersion: v1
 
 metadata:
     name: weatherapp-svc
-    namespace: myns
+    namespace: weatherns
     labels:
         app: weatherapp-svc
 
 spec:
-    type: LoadBalancer
+    type: ClusterIP
     selector:
         app: weatherapp-pod
     ports:
     - name: weatherapp-svc-port
-      port: 80
+      port: 3000
       targetPort: weatherapp-port
+
+---
+kind: Ingress
+apiVersion: networking.k8s.io/v1beta1
+
+metadata:
+  name: weatherapp-ing
+  namespace: weatherns
+  labels:
+    name: weatherapp-ing
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"
+
+spec:
+  rules:
+  - http: 
+      paths: 
+      - path: /
+        backend:
+          serviceName: weatherapp-svc
+          servicePort: 3000

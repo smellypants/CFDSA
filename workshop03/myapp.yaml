@@ -8,7 +8,6 @@ metadata:
         app: myapp-config
 
 data:
-    db_user: root
     db_host: mydb-svc.myns.svc.cluster.local
 
 ---

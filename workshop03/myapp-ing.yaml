@@ -17,5 +17,9 @@ spec:
         paths:
         - path: /customer(/|$)(.*) 
           backend:
-            serviceName: myapp-svc.myns.svc.cluster.local
+            serviceName: myapp-svc
             servicePort: 80
+        - path: /
+          backend:
+            serviceName: fortune-svc
+            servicePort: 3000

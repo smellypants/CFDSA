@@ -1,0 +1,66 @@
+---
+kind: Secret
+apiVersion: v1
+metadata:
+    name: weatherapp-secret
+    namespace: myns
+    labels:
+        app: weatherapp-secret
+
+data:
+    app_id: 65506c6a2fa53b03e48e5b2a35e2fe25
+
+---
+kind: Deployment
+apiVersion: apps/v1
+
+metadata:
+    name: weatherapp-deploy
+    namespace: myns
+    labels:
+        app: weatherapp-deploy
+
+spec:
+    replicas: 2
+    selector:
+        matchLabels:
+            app: weatherapp-pod
+    template:
+        metadata:
+            name: weatherapp-pod
+            labels:
+                app: weatherapp-pod
+                version: v1
+        spec:
+            containers:
+            - name: weatherapp
+              image: stackupiss/weather:v1
+              imagePullPolicy: Always
+              env:
+              - name: APP_ID
+                valueFrom:
+                    secretKeyRef:
+                        name: weatherapp-secret
+                        key: app_id
+              ports:
+              - name: weatherapp-port
+                containerPort: 3000
+
+---
+kind: Service
+apiVersion: v1
+
+metadata:
+    name: weatherapp-svc
+    namespace: myns
+    labels:
+        app: weatherapp-svc
+
+spec:
+    type: LoadBalancer
+    selector:
+        app: weatherapp-pod
+    ports:
+    - name: weatherapp-svc-port
+      port: 80
+      targetPort: weatherapp-port

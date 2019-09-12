@@ -1,28 +1,19 @@
 ---
-kind: Namespace
-apiVersion: v1
-
-metadata:
-    name: myns
-    labels:
-        app: myapp
-
----
 kind: PersistentVolumeClaim
 apiVersion: v1
 
 metadata:
-  name: mydb-pvc
-  namespace: myns
-  labels:
     name: mydb-pvc
-  annotations: 
-    volume.beta.kubernetes.io/storage-provisioner: "dobs.csi.digitalocean.com"
+    namespace: myns
+    labels:
+        name: mydb-pvc
+    annotations:
+        volume.beta.kubernetes.io/storage-provisioner: dobs.csi.digitalocean.com
 
 spec:
-  accessModes:
-  - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
-  storageClassName: do-block-storage
+    accessModes:
+    - ReadWriteOnce
+    resources:
+        requests:
+            storage: 10Gi
+    storageClassName: do-block-storage
